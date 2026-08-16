@@ -1,0 +1,100 @@
+# sssf.config.yaml — Codex subscription roster. One agent, one prompt, one purpose.
+defaults:
+  coding_agent: codex
+  model: gpt-5.6-terra
+  thinking: medium
+  permission_profile: ""          # empty resolves to sssf-<agent name>
+  subagents: false
+  # Codex built-in tools are not individually allowlisted by `codex exec`.
+  # This list documents role intent for prompts/traces; .codex permission
+  # profiles and the post-run permission checker enforce actual effects.
+  tools:
+    - read
+    - search
+    - bash
+    - apply_patch
+  protected_files:
+    - .git/
+    - adws/adw_modules/
+    - adws/adw_sssf_config/
+    - adws/adw_*.py
+    - .codex/
+  data_dir: adws/adw_data
+
+observability:
+  db: adws/adw_data/sssf.db
+  poll_ms: 500
+
+agents:
+  - name: planner
+    model: gpt-5.6
+    thinking: high
+    color: "#a78bfa"
+    purpose: Turn a request into a plan the builder can implement without asking questions.
+    permission_profile: sssf-planner
+    subagents: true
+    prompt_engineering:
+      system: adws/adw_data/prompt_engineering/planner/system.md
+      user: adws/adw_data/prompt_engineering/planner/user.md
+    writes:
+      - specs/
+    tools:
+      - read
+      - search
+      - bash
+      - apply_patch
+      - native_subagents
+
+  - name: builder
+    model: gpt-5.6-terra
+    thinking: high
+    color: "#22d3ee"
+    purpose: Implement the plan exactly; report every changed file in the envelope.
+    permission_profile: sssf-builder
+    prompt_engineering:
+      system: adws/adw_data/prompt_engineering/builder/system.md
+      user: adws/adw_data/prompt_engineering/builder/user.md
+    # No writes key: unrestricted product writes, except protected_files.
+
+  - name: scout
+    model: gpt-5.6-terra
+    thinking: medium
+    color: "#fbbf24"
+    purpose: Find and report where things live; change nothing in the product repository.
+    permission_profile: sssf-scout
+    subagents: true
+    prompt_engineering:
+      system: adws/adw_data/prompt_engineering/scout/system.md
+      user: adws/adw_data/prompt_engineering/scout/user.md
+    writes: []
+    tools:
+      - read
+      - search
+      - bash
+      - native_subagents
+
+  - name: reviewer
+    model: gpt-5.6
+    thinking: high
+    color: "#fb7185"
+    purpose: Confirm that what was built is what was asked for; change nothing.
+    permission_profile: sssf-reviewer
+    prompt_engineering:
+      system: adws/adw_data/prompt_engineering/reviewer/system.md
+      user: adws/adw_data/prompt_engineering/reviewer/user.md
+    writes: []
+
+  - name: documenter
+    model: gpt-5.6-luna
+    thinking: medium
+    color: "#e879f9"
+    purpose: Write up the completed change from the deterministic diff; document only.
+    permission_profile: sssf-documenter
+    prompt_engineering:
+      system: adws/adw_data/prompt_engineering/documenter/system.md
+      user: adws/adw_data/prompt_engineering/documenter/user.md
+    writes:
+      - app_docs/
+      - docs/
+      - "**/*.md"
+      - "*.md"

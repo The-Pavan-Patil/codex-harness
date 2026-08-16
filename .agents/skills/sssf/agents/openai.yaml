@@ -1,0 +1,4 @@
+interface:
+  display_name: "Super Simple Software Factory"
+  short_description: "Run repeatable Codex software workflows"
+  default_prompt: "Use $sssf to install or operate the Codex-backed software factory in this repository."

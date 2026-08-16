@@ -64,7 +64,7 @@
   </g>
   <g class="lb l4">
     <text filter="url(#ts4)" class="lane mono" x="40" y="356">builder</text>
-    <text filter="url(#ts4)" class="kind mono" x="40" y="374" fill="#38BDF8">agent &#183; gemini-3.6-flash</text>
+    <text filter="url(#ts4)" class="kind mono" x="40" y="374" fill="#38BDF8">agent &#183; gpt-5.6-terra</text>
   </g>
   <g class="lb l5">
     <text filter="url(#ts4)" class="lane mono" x="40" y="428">tester</text>

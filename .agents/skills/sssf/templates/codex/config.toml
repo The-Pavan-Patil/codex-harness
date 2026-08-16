@@ -1,0 +1,63 @@
+# Project-scoped Codex settings for SSSF. The adapter selects one permission
+# profile per role and runs with approval_policy=never so an unattended ADW
+# fails instead of hanging on an approval prompt.
+approval_policy = "never"
+
+[features]
+hooks = true
+multi_agent = true
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 4
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "medium"
+
+# Read the repository, write only the runtime reports and the plan product.
+[permissions.sssf-planner.filesystem]
+":minimal" = "read"
+
+[permissions.sssf-planner.filesystem.":workspace_roots"]
+"." = "read"
+"adws/adw_data/**" = "write"
+"specs/**" = "write"
+
+# Read the repository and write only ignored runtime handoffs.
+[permissions.sssf-scout.filesystem]
+":minimal" = "read"
+
+[permissions.sssf-scout.filesystem.":workspace_roots"]
+"." = "read"
+"adws/adw_data/**" = "write"
+
+[permissions.sssf-reviewer.filesystem]
+":minimal" = "read"
+
+[permissions.sssf-reviewer.filesystem.":workspace_roots"]
+"." = "read"
+"adws/adw_data/**" = "write"
+
+# Product write access with the factory, roster, workflows, and Codex policy
+# carved back to read-only. Post-run hashing enforces the same boundary again.
+[permissions.sssf-builder.filesystem]
+":minimal" = "read"
+
+[permissions.sssf-builder.filesystem.":workspace_roots"]
+"." = "write"
+".git/**" = "read"
+".codex/**" = "read"
+"adws/adw_modules/**" = "read"
+"adws/adw_sssf_config/**" = "read"
+
+# Documentation-only writes. Codex cannot natively allow writes by file
+# extension, so the adapter supplies a generated profile and the post-run hash
+# checker enforces the exact Markdown allowlist on every platform.
+[permissions.sssf-documenter.filesystem]
+":minimal" = "read"
+
+[permissions.sssf-documenter.filesystem.":workspace_roots"]
+"." = "write"
+".git/**" = "read"
+"adws/adw_data/**" = "write"
+"app_docs/**" = "write"
+"docs/**" = "write"
